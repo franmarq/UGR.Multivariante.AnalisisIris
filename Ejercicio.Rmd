@@ -1,0 +1,197 @@
+---
+title: "TECNICAS DE ANALISIS MULTIVARIANTE EJERCICIOS TEMA 1"
+author: "franmarq@gmail.com"
+date: '2022-10-02'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Tarea 1. Abrir el fichero de datos IRIS que estan en R base.
+
+Para hacer la carga del archivo en la sesión de trabajo usamos el comando 'data'. Hacemos inicialmente un examen visual de la estructura y contenido del mismo utilizando el comando 'str'
+
+```{r iris}
+data(iris)
+str(iris)
+```
+En resumen, el conjunto de datos está formado por 150 observaciones de flores de la planta iris, 5 Variables de las cuales 4 son numericas y se refieren a distintas mediciones acerca de las plantas y una variable cualtitativa/Factor, la cual presenta valores distintos e indica en tipo de planta a la cual se refiere la observacion: virginica, setosa y versicolor.
+
+
+## Tarea 2. Obtener estadisticos descriptivos de cada variable.
+Para la obtención de los estadísticos principales, usaremos el comando 'summary' 
+
+```{r summary}
+
+summary(iris)
+```
+Obtenemos valores de rango y posicion, como el promedio y la mediana de cada una de las variables de largo y ancho tanto de los sépalos como de los pétalos de las plantas. Podemos comprobar como cada una de las especiales cuenta con 50 observaciones.
+En esta parte del análisis es importante tambien determinar si tenemos valores perdidos. Para ello usamos el siguiente comando
+
+```{r na.data}
+colSums(is.na(iris))
+```
+El resultado indica que no tenemos valores perdidos, por lo que podremos usar el 100 del archivo.
+
+
+## Tarea 3. Obtener estadisticos descriptivos de cada variable segun la especie.
+
+Para esta actividad, primero se van tres conjuntos de datos, uno por cada especie a partir del archivo 'Iris'. Luego aplicaremos la función 'summary' en cada uno de ellos y así obtendremos los estadísticos descriptivos.
+
+```{r sumXesp}
+irisVer <- subset(iris, Species == "versicolor")
+irisSet <- subset(iris, Species == "setosa")
+irisVir <- subset(iris, Species == "virginica")
+
+summary(irisVer)
+summary(irisSet)
+summary(irisVir)
+```
+Con base en resultado podemos hacer una comparaciones iniciales entre las mediciones de las tres especies.
+Sobre la variable 'Sepal.length': vemos como la especie que en promedio registró mayores valores fue Virginica, La de menor valor promedio registrado fue la especie Setosa.
+Sobre la variable 'Sepal.width': vemos como la especie que en promedio registró mayores valores fue Setosa, La de menor valor promedio registrado fue la especie Versicolor.
+Sobre la variable 'Petal.length': vemos como la especie que en promedio registró mayores valores fue Virginica, La de menor valor promedio registrado fue la especie Setosa.
+Sobre la variable 'Petal.width': vemos como la especie que en promedio registró mayores valores fue Virginica, La de menor valor promedio registrado fue la especie Setosa.
+
+
+## Tarea 4. Obtener representaciones graficas de cada variable de forma individual y por tipo de planta.
+
+Se usarán Histogramas de frecuencias y gráficos de cajas para las representaciones gráficas individuales y por especies.
+
+### Graficos individuales
+```{r graf}
+par(mfrow = c(2,2))
+hist(iris$Sepal.Length)
+hist(iris$Sepal.Width)
+hist(iris$Petal.Length)
+hist(iris$Petal.Width)
+par(mfrow = c(1,1))
+
+par(mfrow = c(2,2))
+
+boxplot(iris$Sepal.Length,xlab="Sepal length", ylab="Mediciones obtenidas", main="Distribución de la Variable sepal length")
+
+boxplot(iris$Sepal.Width,xlab="Sepal Width", ylab="Mediciones obtenidas", main="Distribución de la Variable Sepal Width")
+
+boxplot(iris$Petal.Length,xlab="Petal length", ylab="Mediciones obtenidas", main="Distribución de la Variable Petal length")
+
+boxplot(iris$Petal.Width,xlab="Petal Width", ylab="Mediciones obtenidas", main="Distribución de la Variable Petal Width")
+
+par(mfrow = c(1,1))
+
+
+```
+### Gráficos agrupados por tipo de planta
+
+Para los gráficos de Cajas usaremos el paquete ggplot2
+
+```{r grafagrup}
+require(ggplot2)
+par(mfrow = c(2,2))
+
+ggplot(data = iris, aes(x = Species, y = Sepal.Length, color = Species)) +
+  geom_boxplot() +
+  theme_bw()
+ggplot(data = iris, aes(x = Species, y = Sepal.Width, color = Species)) +
+  geom_boxplot() +
+  theme_bw()
+ggplot(data = iris, aes(x = Species, y = Petal.Length, color = Species)) +
+  geom_boxplot() +
+  theme_bw()
+ggplot(data = iris, aes(x = Species, y = Petal.Width, color = Species)) +
+  geom_boxplot() +
+  theme_bw()
+
+par(mfrow = c(1,1))
+```
+
+
+## Tarea 5. Comprobar la hipotesis estudiadas para cada variable y segun el tipo de especie.
+
+Se hará una comprobación de las hipótesis comunes a examinar en el análisis multivariante    
+
+### Hipotesis 1: Normalidad
+Se inicia con pruebas de normalidad individual y luego una comprobación del conjunto completo de variables.
+
+Evaluación individual:
+
+```{r hipNormalidad}
+require(pastecs)
+round(stat.desc(iris[,c("Sepal.Length","Sepal.Width","Petal.Length","Petal.Width")],basic=FALSE,norm=TRUE),digits=3)
+
+
+```
+
+En este caso,  los valores superiores, de skew.2SE y/o kurt.2se indican cierta proximidad en valor absoluto a 1, acercamiento criterio de normalidad, lo que sugiere que la hipótesis se cumple, excepto para las variables Petal.Length y Petal.Width.
+
+Se usará tambien los gráficos QQ-plot para valorar la normalidad individual. 
+
+```{r hipNormQQ}
+require(car)
+par(mfrow=c(2,2))
+qqPlot(iris$Sepal.Length)
+qqPlot(iris$Sepal.Width)
+qqPlot(iris$Petal.Length)
+qqPlot(iris$Petal.Width)
+
+par(mfrow=c(1,1))
+
+```
+
+La forma de los gráficos corrobora los comportamientos observados en el análisis anterior. Las variables Sepal se comportan de acuerdo a un criterio nromal.
+
+Para evaluar normalidad en el caso multivariante usaremos el test de shapiro-wilk el cual es recomendado en conjuntos de hasta 50 observaciones. 
+
+
+
+```{r hipNorTestShap}
+shapiro.test(iris$Sepal.Length)
+shapiro.test(iris$Sepal.Width)
+shapiro.test(iris$Petal.Length)
+shapiro.test(iris$Petal.Width)
+
+```
+Los resultados del test muestran que sólo para el caso de la variable Sepal.width no podemos rechazar la hipótesis nula: los datos siguen una distribución Normal. Para el resto de variables no se cumple el criterio de normalidad. 
+
+Normalidad Multivariante: 
+
+Para comprobar la normalidad multivariante usaremos el paquete MNV que nos permita ejecutar el test de Mardia, Henze-Zirkler o Royston. En nuestrao caso aplicaremos el test de Royston
+
+```{r hipNorTestShap2}
+require(MVN)
+mvn(iris[,c("Sepal.Length","Sepal.Width","Petal.Length","Petal.Width")],mvnTest = "royston",univariateTest = "Lillie")
+
+```
+
+El resultado de la prueba indica que no hay evidencia suficiente para aceptar la Hipótesis de que en conjunto los datos siguen un comportamiento Normal. 
+
+
+### Hipótesis 2: Homocedasticidad
+
+Para comprobar esta hipótesis usaremos el test de Levine.
+
+```{r homo}
+require(car)
+lapply(iris[,c("Sepal.Length","Sepal.Width","Petal.Length","Petal.Width")],leveneTest,iris$Species)
+```
+Con base en el resultado del test, podemos concluir que en los siguientes grupos no se acepta la idea de igualdad de varianzas: "Sepal.Length","Petal.Length" y"Petal.Width".
+
+
+### Hipótesis 3: Linealidad
+
+
+Evaluaremos este criterio a partir del uso de la siguientes gráficas:
+
+```{r lineal}
+require("PerformanceAnalytics")
+plot(iris[,c("Sepal.Length","Sepal.Width","Petal.Length","Petal.Width")], col=iris$Species)
+chart.Correlation(iris[,c("Sepal.Length","Sepal.Width","Petal.Length","Petal.Width")], histogram=TRUE,col=iris$Species)
+
+```
+
+El resultado confirma la linealidad para las variables excepto para el caso de las variables Sepal.Length y Sepal.Width
+
+
+
